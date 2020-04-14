@@ -12,7 +12,7 @@ import Profile from './user/Profile'
 import PrivateRoute from './auth/PrivateRoute'
 import Menu from './core/Menu'
 
-function MainRouter() {
+export default function MainRouter() {
     return (<div>
       <Menu />
       <Switch>
@@ -26,7 +26,5 @@ function MainRouter() {
         <Route path="/tasks" component={Tasks}/>
         <Route component={NotFoundPage} />
       </Switch>
-    </div>)
-}
-
-export default MainRouter;
+    </div>);
+};

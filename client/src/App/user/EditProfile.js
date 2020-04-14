@@ -67,7 +67,7 @@ export default function EditProfile(props) {
         return function cleanup() {
           abortController.abort();
         };
-  }, [userId, jwt.token], );
+  }, [userId, jwt.token]);
  
   const clickSubmit = () => {
     const user = {

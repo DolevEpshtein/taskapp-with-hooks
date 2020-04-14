@@ -19,14 +19,14 @@ const list = async (credentials, signal) => {
   try {
     let response = await fetch('/api/tasks/', {
       method: 'GET',
-      signal: signal,
+      signal,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + credentials.t
       }
     });
-      return await response.json();
+    return await response.json();
     } catch(err) { 
       console.log(err);
     }
@@ -43,7 +43,7 @@ const read = async (params, credentials, signal) => {
         'Authorization': 'Bearer ' + credentials.t
       }
     });
-      return await response.json();
+    return await response.json();
     } catch(err) { 
       console.log(err);
   }
@@ -60,7 +60,7 @@ const update = async (params, credentials, task) => {
       },
       body: JSON.stringify(task)
     });
-      return await response.json();
+    return await response.json();
     } catch(err) { 
       console.log(err);
   }

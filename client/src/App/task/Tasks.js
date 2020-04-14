@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import Paper from '@material-ui/core/Paper';
 import { List, ListItem, ListItemSecondaryAction, ListItemAvatar, ListItemText } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
@@ -12,6 +12,7 @@ import auth from './../auth/auth-helper';
 import { Link } from 'react-router-dom';
 import { list, update } from './api-task.js';
 import { makeStyles } from '@material-ui/styles';
+import filterReducer from '../reducers/tasksFilterReducer';
 
 const styles = makeStyles((theme) => ({
   root: theme.mixins.gutters({
@@ -29,11 +30,10 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   // const [completedTasks, setCompleted] = useState([]);
   // const [incompleteTasks, setIncomplete] = useState([]);
-  // const [filter, setFilter] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
-
+  // const [filter, setFilter] = useState('filter');
+  const [filter, dispatchFilter] = useReducer(filterReducer, 'ALL');
   const jwt = auth.isAuthenticated();
-
+  
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -45,21 +45,42 @@ export default function Tasks() {
           setTasks(data);
         }
     });
-  }, [tasks, jwt.token]);
+    return function cleanup() {
+      abortController.abort()
+    };
+
+  }, [jwt.token, tasks]);
+
+  const handleShowAll = () => {
+    dispatchFilter({ type: 'SHOW_ALL' });
+  };
+
+  const handleShowComplete = () => {
+    dispatchFilter({ type: 'SHOW_COMPLETE' });
+  };
+
+  const handleShowIncomplete = () => {
+    dispatchFilter({ type: 'SHOW_INCOMPLETE' });
+  };
 
   const handleFilter = e => {
-    // const filterValue = e.target.value;
-    // if (filterValue === 1)
-    //   setTasks(completedTasks);
-    // else
-    //   setTasks(incompleteTasks);
-    // setFilter(e.target.value);
-    //  if (filter)
-    //   setTasks(completedTasks);
-    // else
-    //   setTasks(incompleteTasks);
-      
-  }
+    switch(e.target.value) {
+      case 'ALL': {
+        handleShowAll();
+        break;
+      }
+      case 'COMPLETE': {
+        handleShowComplete();
+        break;
+      }
+      case 'INCOMPLETE': {
+        handleShowIncomplete();
+        break;
+      }
+      default:
+        handleShowAll();
+    }
+  };
 
   const handleChecked = index => e => {
     let task = {
@@ -81,26 +102,43 @@ export default function Tasks() {
     })
   };
 
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'ALL') {
+      return true;
+    }
+    if (filter === 'COMPLETE' && task.completed) {
+      return true;
+    }
+    if (filter === 'INCOMPLETE' && !task.completed) {
+      return true;
+    }
+    return false;
+  });
+
+  
   return ( 
     <Paper className={classes.root} elevation={4}>
-      <Typography type="title" className={classes.title}>
+      <Typography 
+        type="title" 
+        variant="h6" 
+        className={classes.title}>
         My Tasks
       </Typography>
       <Select
       native
-      value={''}
+      value={filter}
       onChange={handleFilter}
       inputProps={{
         name: 'completed-filter',
         id: 'age-native-simple',
       }}
     >
-      <option aria-label="None" value={'no-filter'}>Filter</option>
-      <option value={'completed'}>Completed</option>
-      <option value={'false'}>Not Completed</option>
-    </Select>
+      <option aria-label="None" value={'ALL'}>Filter</option>
+      <option value={'COMPLETE'} >Completed</option>
+      <option value={'INCOMPLETE'} >Not Completed</option>
+    </Select> 
       <List dense>
-        {tasks.map((item, i) => {
+        {filteredTasks.map((item, i) => {
         return (<ListItem button key={i}>
                   <ListItemAvatar>
                     <Avatar>
@@ -111,12 +149,12 @@ export default function Tasks() {
                   </ListItemAvatar>
                   <ListItemText primary={item.description} />
                   <ListItemSecondaryAction>
-                    <Link to={"/tasks/" + tasks[i]._id}>
+                    <Link to={"/tasks/" + filteredTasks[i]._id}>
                       <IconButton aria-label="Edit" color="primary">
                         <Edit/>
                       </IconButton>
                     </Link>
-                    <DeleteTask taskId={tasks[i]._id} />
+                    <DeleteTask taskId={filteredTasks[i]._id} />
                   </ListItemSecondaryAction>
                 </ListItem>
         )})}
