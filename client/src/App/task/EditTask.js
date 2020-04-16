@@ -53,40 +53,31 @@ export default function EditTask({ match }) {
     setValues({...values, description: event.target.value })
   };
 
-  useEffect(() => {  
-    const abortController = new AbortController();
-    const signal = abortController.signal;
+  useEffect(() => { 
+    const updateData = async () => {
+    const data = await read({ taskId }, { t: jwt.token });
+    if (data && data.error) {
+      setValues(values => ({
+        ...values, 
+        error: data.error
+      }));
+    } else {
+        setValues(values => ({
+          ...values,
+          description: data.description
+        }));
+    }
+  };
 
-    read({
-      taskId
-    }, {t: jwt.token}, signal).then((data) => {
-        if (data && data.error) {
-          setValues({
-            ...values, 
-            error: data.error
-          });
-        } else {
-          setValues({
-            ...values,
-            description: data.description
-          });
-        }
-      });
-      return function cleanup() {
-        abortController.abort();
-      };
-  }, [taskId, jwt.token]);
+  updateData();
+}, [jwt.token, taskId]);
 
   const clickSubmit = () => {
     const task = {
       description: values.description || undefined
     };
-
-    update({
-      taskId
-    }, {
-      t: jwt.token
-    }, task).then((data) => {
+    const updateData = async () => {
+      const data = await update({ taskId }, { t: jwt.token }, task);
       if (data && data.error) {
         setValues({
           ...values, 
@@ -99,7 +90,9 @@ export default function EditTask({ match }) {
           redirectToTasks: true
         });
       }
-    });
+    };
+    
+    updateData();
   };
 
   if (values.redirectToTasks) {

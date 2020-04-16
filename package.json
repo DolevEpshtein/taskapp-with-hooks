@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node server/index.js",
     "server": "nodemon server/index.js",
-    "client": "npm start --prefix client",
+    "client": "react-scripts start",
     "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"cd client && npm start\""
   },
   "keywords": [],
   "author": "",

@@ -49,24 +49,20 @@ export default function EditProfile(props) {
   const userId = props.match.params.userId;
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
+    const fetchData = async () => {
+      const data = await read({ userId }, { t: jwt.token });
+      if (data && data.error) {
+        setValues(values => ({ ...values, error: data.error }));
+      } else {
+        setValues(values => ({
+          ...values,
+          name: data.name || undefined,
+          email: data.email || undefined
+      }));
+      }
+    };
 
-    read({
-      userId
-    }, {t: jwt.token}, signal).then((data) => {
-        if (data && data.error) {
-          setValues({ ...values, error: data.error });
-        } else {
-          setValues({
-            ...values,
-            name: data.name || undefined,
-            email: data.email || undefined
-          });
-        }});
-        return function cleanup() {
-          abortController.abort();
-        };
+    fetchData();
   }, [userId, jwt.token]);
  
   const clickSubmit = () => {
@@ -74,18 +70,17 @@ export default function EditProfile(props) {
       name: values.name || undefined,
       email: values.email || undefined,
       password: values.password || undefined
-    }
-    update({
-      userId
-    }, {
-      t: jwt.token
-    }, user).then((data) => {
-        if (data && data.error) {
-          setValues({ ...values, error: data.error })
-        } else {
-          setValues({...values, userId: data._id, redirectToProfile: true})
-        }
-    });
+    };
+    const updateData = async () => {
+      const data = await update({ userId }, { t: jwt.token }, user);
+      if (data && data.error) {
+        setValues({ ...values, error: data.error });
+      } else {
+        setValues({...values, userId: data._id, redirectToProfile: true});
+      }
+    };
+
+    updateData();
   };
 
   const handleChange = name => event => {

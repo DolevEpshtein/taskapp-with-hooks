@@ -28,28 +28,21 @@ const styles = makeStyles((theme) => ({
 export default function Tasks() {
   const classes = styles();
   const [tasks, setTasks] = useState([]);
-  // const [completedTasks, setCompleted] = useState([]);
-  // const [incompleteTasks, setIncomplete] = useState([]);
-  // const [filter, setFilter] = useState('filter');
   const [filter, dispatchFilter] = useReducer(filterReducer, 'ALL');
   const jwt = auth.isAuthenticated();
   
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-   
-    list({t: jwt.token}, signal).then((data) => {
-        if (data && data.error) {
-          console.log(data.error)
-        } else {
-          setTasks(data);
-        }
-    });
-    return function cleanup() {
-      abortController.abort()
+    const fetchData = async () => {
+      const data = await list({ t: jwt.token });
+      if (data && data.error) {
+        console.log(data.error);
+      } else {
+        setTasks(data);
+      }
     };
-
-  }, [jwt.token, tasks]);
+    
+    fetchData();
+  }, [jwt.token]);
 
   const handleShowAll = () => {
     dispatchFilter({ type: 'SHOW_ALL' });
@@ -115,6 +108,12 @@ export default function Tasks() {
     return false;
   });
 
+  const removeTask = (task) => {
+    const updatedTasks = [...tasks];
+    const index = updatedTasks.indexOf(task);
+    updatedTasks.splice(index, 1);
+    setTasks(updatedTasks);
+  };
   
   return ( 
     <Paper className={classes.root} elevation={4}>
@@ -154,7 +153,8 @@ export default function Tasks() {
                         <Edit/>
                       </IconButton>
                     </Link>
-                    <DeleteTask taskId={filteredTasks[i]._id} />
+                    <DeleteTask task={filteredTasks[i]}
+                     taskId={filteredTasks[i]._id} onRemove={removeTask}/>
                   </ListItemSecondaryAction>
                 </ListItem>
         )})}

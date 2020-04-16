@@ -18,15 +18,17 @@ export default function DeleteUser({ userId }) {
   };
 
   const deleteAccount = () => {
-    remove({
-      userId
-    }, {t: jwt.token}).then((data) => {
-      if (data.error) {
-        console.log(data.error)
+    const removeUser = async () => {
+      const data = await remove({ userId }, { t: jwt.token });
+      if (data && data.error) {
+        console.log(data.error);
       } else {
-        auth.signout(() => console.log('deleted'))
-        setRedirect(true);      }
-    })
+        auth.clearJWT(() => console.log('deleted'));
+        setRedirect(true);
+      }
+    };
+
+    removeUser();
   };
 
   const handleRequestClose = () => {

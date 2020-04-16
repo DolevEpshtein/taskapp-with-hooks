@@ -36,22 +36,16 @@ export default function Profile({ match }) {
 
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal
-
-    read({
-      userId
-    }, {t: jwt.token}, signal).then((data) => {
+    const fetchData = async () => {
+      const data = await read({ userId }, {t: jwt.token});
       if (data && data.error) {
         setRedirectToSignin(true);
       } else {
         setUser(data);
       }
-    });
-
-    return function cleanup(){
-      abortController.abort();
     };
+
+    fetchData();
   }, [userId, jwt.token]);
 
   if (redirectToSignin) {

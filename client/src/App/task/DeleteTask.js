@@ -7,7 +7,7 @@ import auth from './../auth/auth-helper';
 import { remove } from './api-task';
 import { Redirect } from 'react-router-dom';
 
-export default function DeleteTask({ taskId }) {
+export default function DeleteTask(props) {
   const [redirect, setRedirect] = useState(false);
   const [open, setOpen] = useState(false);
   const jwt = auth.isAuthenticated();
@@ -17,19 +17,22 @@ export default function DeleteTask({ taskId }) {
   };
 
   const deleteTask = () => {
-    remove({
-      taskId
-    }, {t: jwt.token}).then((data) => {
+    const removeData = async () => {
+      const data = await remove({ taskId: props.taskId }, {t: jwt.token});
       if (data && data.error) {
-        console.log(data.error)
+        console.log(data.error);
       } else {
-        setRedirect(true);      }
-    })
+        setRedirect(true);
+        props.onRemove(props.task);
+      }
+    };
+
+    removeData();
   };
   
   const handleRequestClose = () => {
     setOpen(false);
-  }
+  };
 
   if (redirect) {
     return (<Redirect to={'/tasks'} />)

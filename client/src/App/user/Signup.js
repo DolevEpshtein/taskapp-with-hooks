@@ -55,15 +55,20 @@ export default function Signup() {
       email: values.email || undefined,
       password: values.password || undefined
     }
-    create(user).then((data) => {
-      if (data.error) {
-        console.log('signup error')
-        setValues({ ...values, error: data.error})
-      } else {
-        setValues({ ...values, error: '', open: true})
+    const createUser = async () => {
+      const data = await create(user);
+      if (data) {
+        if (data.error) {
+          console.log('signup error')
+          setValues({ ...values, error: data.error });
+        } else {
+          setValues({ ...values, error: '', open: true });
+        }
       }
-    })
-  }
+    };
+
+    createUser();
+  };
 
   return (<div>
     <Card className={classes.card}>

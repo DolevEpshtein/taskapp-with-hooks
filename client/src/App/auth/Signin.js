@@ -51,18 +51,20 @@ export default function Signin(props) {
     };
 
     signin(user).then((data) => {
-      if (data.error) {
-        setValues({
-          ...values,
-          error: data.error
-        });
-      } else {
-        auth.authenticate(data, () => {
+      if (data) {
+        if (data.error) {
           setValues({
             ...values,
-            redirectToReferrer: true
+            error: data.error
           });
-        })
+        } else {
+          auth.authenticate(data, () => {
+            setValues({
+              ...values,
+              redirectToReferrer: true
+            });
+          })
+        }
       }
     });
   };

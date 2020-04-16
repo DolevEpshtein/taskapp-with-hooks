@@ -55,20 +55,23 @@ export default function CreateTask() {
       description: values.description || undefined
     };
 
-    create(task, { t: jwt.token }).then((data) => {
-      if (data && data.error) {
-        setValues({
-          ...values, 
-          error: data.error
-        });
-      } else {
+    const createData = async () => {
+      const data = await create(task, { t: jwt.token });
+        if (data && data.error) {
           setValues({
             ...values, 
-            error: '',
-            open: true
+            error: data.error
           });
+        } else {
+            setValues({
+              ...values, 
+              error: '',
+              open: true
+            });
         }
-    });
+      };
+      
+      createData();
   };
 
   return ( 
