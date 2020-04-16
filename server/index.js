@@ -8,18 +8,19 @@ const authRoutes = require('./routes/auth.routes');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Serve the static files from the React app
-app.use(express.static(path.join(__dirname, '../client/build')));
-
 app.use(express.json())
 app.use('/', userRoutes);
 app.use('/', authRoutes);
 app.use('/', taskRoutes);
 
-// Handles any requests that don't match the ones above
-app.get('*', (req,res) =>{
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
-});
+if (process.env.NODE_ENV === 'production') {
+  // Serve the static files from the React app
+  // app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static('client/build'));
+  app.get('*', (req,res) =>{ 
+    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  });
+};
 
 app.listen(port, (err) => {
   if (err)
